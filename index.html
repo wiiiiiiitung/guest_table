@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Find Your Table</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: #fdf8f2;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: #5a3e2b;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    p.subtitle {
+      color: #9e7e5f;
+      margin-bottom: 32px;
+      font-size: 1rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      padding: 40px;
+      width: 100%;
+      max-width: 480px;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px 18px;
+      font-size: 1.1rem;
+      border: 2px solid #e0d5c5;
+      border-radius: 10px;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: inherit;
+      color: #3a2e22;
+    }
+
+    input:focus {
+      border-color: #b89070;
+    }
+
+    #results {
+      margin-top: 24px;
+    }
+
+    .result-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 18px;
+      border-radius: 10px;
+      background: #fdf3e7;
+      margin-bottom: 10px;
+      border-left: 4px solid #c9a07a;
+    }
+
+    .result-name {
+      font-size: 1rem;
+      color: #3a2e22;
+    }
+
+    .result-table {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #7a4f2e;
+      white-space: nowrap;
+      margin-left: 16px;
+    }
+
+    .no-result {
+      text-align: center;
+      color: #b0927a;
+      padding: 16px;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <h1>Find Your Table</h1>
+  <p class="subtitle">Type your name below to find your seat</p>
+
+  <div class="card">
+    <input type="text" id="search" placeholder="Enter your name..." autocomplete="off" />
+    <div id="results"></div>
+  </div>
+
+  <script>
+    let guests = [];
+
+    fetch('guests.csv')
+      .then(r => r.text())
+      .then(text => {
+        const lines = text.trim().split('\n').slice(1);
+        guests = lines.map(line => {
+          const comma = line.lastIndexOf(',');
+          return {
+            name: line.slice(0, comma).trim(),
+            table: line.slice(comma + 1).trim()
+          };
+        });
+      });
+
+    document.getElementById('search').addEventListener('input', function () {
+      const query = this.value.trim().toLowerCase();
+      const resultsEl = document.getElementById('results');
+
+      if (!query) {
+        resultsEl.innerHTML = '';
+        return;
+      }
+
+      const matches = guests.filter(g => g.name.toLowerCase().includes(query));
+
+      if (matches.length === 0) {
+        resultsEl.innerHTML = '<div class="no-result">No match found. Try a different spelling.</div>';
+      } else {
+        resultsEl.innerHTML = matches.map(g => `
+          <div class="result-item">
+            <span class="result-name">${g.name}</span>
+            <span class="result-table">Table ${g.table}</span>
+          </div>
+        `).join('');
+      }
+    });
+  </script>
+</body>
+</html>
