@@ -104,6 +104,8 @@
   <script>
     let guests = [];
 
+    const toTitleCase = s => s.replace(/\b\w/g, c => c.toUpperCase());
+
     fetch('guests.csv')
       .then(r => r.text())
       .then(text => {
@@ -111,7 +113,7 @@
         guests = lines.map(line => {
           const comma = line.lastIndexOf(',');
           return {
-            name: line.slice(0, comma).trim(),
+            name: toTitleCase(line.slice(0, comma).trim()),
             table: line.slice(comma + 1).trim()
           };
         });
